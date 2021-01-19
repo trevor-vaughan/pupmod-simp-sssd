@@ -94,6 +94,8 @@ describe 'sssd' do
       end
 
       it 'should be idempotent' do
+        require 'pry'
+        binding.pry
         apply_manifest_on(host, manifest, :catch_changes => true)
       end
 

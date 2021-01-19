@@ -31,7 +31,10 @@ end
 group :system_tests do
   gem 'beaker'
   gem 'beaker-rspec'
-  gem 'simp-beaker-helpers', ENV['SIMP_BEAKER_HELPERS_VERSION'] || ['>= 1.18.7', '< 2']
+  gem 'beaker-docker', :path => ENV['HOME'] + '/Work/beaker-docker'
+  gem 'docker-api', :path => ENV['HOME'] + '/Work/docker-api'
+  #gem 'simp-beaker-helpers', ENV['SIMP_BEAKER_HELPERS_VERSION'] || ['>= 1.18.7', '< 2']
+  gem 'simp-beaker-helpers', :path => ENV['HOME'] + '/Work/SIMP/rubygem-simp-beaker-helpers'
 end
 
 # Evaluate extra gemfiles if they exist

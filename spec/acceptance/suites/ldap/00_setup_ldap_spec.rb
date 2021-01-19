@@ -2,20 +2,17 @@ require 'spec_helper_acceptance'
 
 test_name 'Setup LDAP'
 
-
-
 describe 'LDAP' do
 
-  ldap_servers = hosts_with_role(hosts,'ldap')
+  let(:server_manifest) {
+     <<-EOS
+        include 'simp_openldap::server'
+     EOS
+  }
 
-let(:server_manifest) {
-   <<-EOS
-      include 'simp_openldap::server'
-   EOS
-}
+  install_simp_repos(hosts)
 
-
-  ldap_servers.each do |server|
+  hosts_with_role(hosts, 'ldap').each do |server|
     server_fqdn  = fact_on(server,'fqdn')
     domain       = fact_on(server, 'domain')
     base_dn      = domain.split('.').map{ |d| "dc=#{d}" }.join(',')
@@ -34,7 +31,6 @@ let(:server_manifest) {
     end
 
     it 'should be able to add a user' do
-
       create_remote_file(server, '/tmp/add_testuser.ldif', ERB.new(add_testuser).result(binding))
 
       on(server, "ldapadd -D cn=LDAPAdmin,ou=People,#{base_dn} -H ldaps://#{server_fqdn} -w suP3rP@ssw0r! -x -f /tmp/add_testuser.ldif")
@@ -42,6 +38,5 @@ let(:server_manifest) {
       result = on(server, "ldapsearch -LLL -D cn=LDAPAdmin,ou=People,#{base_dn} -H ldaps://#{server_fqdn} -w suP3rP@ssw0r! -x uid=test.user")
       expect(result.stdout).to include("dn: uid=test.user,ou=People,#{base_dn}")
     end
-
   end
 end

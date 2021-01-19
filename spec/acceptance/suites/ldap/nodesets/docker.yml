@@ -1,0 +1,78 @@
+<%
+  if ENV['BEAKER_HYPERVISOR']
+    hypervisor = ENV['BEAKER_HYPERVISOR']
+  else
+    hypervisor = 'vagrant'
+  end
+-%>
+HOSTS:
+  ldapserver:
+    roles:
+      - ldap
+      - default
+    platform: el-7-x86_64
+    hypervisor: docker
+    image: centos:7
+    docker_cmd: '["/sbin/init"]'
+    docker_image_commands:
+      - 'yum -y install initscripts ||:'
+      - '(cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done)'
+      - 'rm -f /lib/systemd/system/multi-user.target.wants/*'
+      - 'rm -f /etc/systemd/system/*.wants/*'
+      - 'rm -f /lib/systemd/system/local-fs.target.wants/*'
+      - 'rm -f /lib/systemd/system/sockets.target.wants/*udev*'
+      - 'rm -f /lib/systemd/system/sockets.target.wants/*initctl*'
+      - 'rm -f /lib/systemd/system/basic.target.wants/*'
+      - 'rm -f /lib/systemd/system/anaconda.target.wants/*'
+      - 'systemctl enable sshd'
+    mount_folders:
+      cgroup:
+        host_path: '/sys/fs/cgroup'
+        container_path: '/sys/fs/cgroup'
+        opts: 'ro'
+
+# centos8:
+#   roles:
+#     - default
+#     - client
+#     - sssdv2
+#   platform: el-8-x86_64
+#   hypervisor: docker
+#   image: centos:8
+#   docker_cmd: '["/sbin/init"]'
+#   docker_image_commands:
+#     - 'yum -y install initscripts ||:'
+
+  centos7:
+    roles:
+      - client
+      - sssdv1
+    platform: el-7-x86_64
+    hypervisor: docker
+    image: centos:7
+    docker_cmd: '["/sbin/init"]'
+    docker_image_commands:
+      - 'yum -y install initscripts ||:'
+      - '(cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done)'
+      - 'rm -f /lib/systemd/system/multi-user.target.wants/*'
+      - 'rm -f /etc/systemd/system/*.wants/*'
+      - 'rm -f /lib/systemd/system/local-fs.target.wants/*'
+      - 'rm -f /lib/systemd/system/sockets.target.wants/*udev*'
+      - 'rm -f /lib/systemd/system/sockets.target.wants/*initctl*'
+      - 'rm -f /lib/systemd/system/basic.target.wants/*'
+      - 'rm -f /lib/systemd/system/anaconda.target.wants/*'
+      - 'systemctl enable sshd'
+    mount_folders:
+      cgroup:
+        host_path: '/sys/fs/cgroup'
+        container_path: '/sys/fs/cgroup'
+        opts: 'ro'
+
+CONFIG:
+  log_level: verbose
+  type: aio
+  docker_cap_add:
+    - AUDIT_WRITE
+<% if ENV['BEAKER_PUPPET_ENVIRONMENT'] -%>
+  puppet_environment: <%= ENV['BEAKER_PUPPET_ENVIRONMENT'] %>
+<% end -%>
